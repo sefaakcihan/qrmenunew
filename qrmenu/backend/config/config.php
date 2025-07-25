@@ -1,13 +1,13 @@
 <?php
 // backend/config/config.php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'restaurant_menu');
+define('DB_NAME', 'qrmenu');
 define('DB_USER', 'root'); // Değiştirilmeli
 define('DB_PASS', ''); // Değiştirilmeli
-define('DB_CHARSET', 'utf8mb4');
+//define('DB_CHARSET', 'utf8mb4');
 
 // Site ayarları
-define('SITE_URL', 'http://localhost/restaurant-menu');
+define('SITE_URL', 'https://localhost/qrmenunew/qrmenu');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 define('UPLOAD_URL', SITE_URL . '/uploads/');
 
