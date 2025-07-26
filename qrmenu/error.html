@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hata - Lezzet Restaurant</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C8102E',
+                        secondary: '#FFD700',
+                        accent: '#2E8B57'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
+        }
+        
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="text-center max-w-md fade-in">
+        <!-- Error Icon -->
+        <div class="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6 bounce">
+            <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+        </div>
+        
+        <!-- Error Title -->
+        <h1 id="error-title" class="text-3xl font-bold text-gray-900 mb-4">
+            Bir Hata Oluştu
+        </h1>
+        
+        <!-- Error Description -->
+        <p id="error-description" class="text-gray-600 mb-6">
+            Üzgünüz, bir hata oluştu. Lütfen daha sonra tekrar deneyin.
+        </p>
+        
+        <!-- Error Code -->
+        <div id="error-code" class="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-center">
+                <svg class="w-5 h-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-sm text-gray-600">Hata Kodu: <span id="status-code">500</span></span>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+            <button onclick="goBack()" 
+                    class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+                Geri Dön
+            </button>
+            
+            <button onclick="goHome()" 
+                    class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                Ana Sayfaya Git
+            </button>
+            
+            <button onclick="window.location.reload()" 
+                    class="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                Sayfayı Yenile
+            </button>
+        </div>
+        
+        <!-- Help Text -->
+        <div class="mt-8 text-left">
+            <h3 class="font-semibold text-gray-900 mb-2">Sorun devam ediyorsa:</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Sayfayı yenileyin</li>
+                <li>• İnternet bağlantınızı kontrol edin</li>
+                <li>• Birkaç dakika bekleyip tekrar deneyin</li>
+                <li>• Bizimle iletişime geçin</li>
+            </ul>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="mt-8 p-4 bg-gradient-to-r from-primary to-secondary rounded-lg text-white">
+            <h3 class="font-bold mb-2">Lezzet Restaurant</h3>
+            <p class="text-sm opacity-90">
+                📍 Atatürk Caddesi No:123, Seyhan/Adana<br>
+                📞 +90 322 123 45 67<br>
+                📧 info@lezzetrestaurant.com
+            </p>
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="mt-6 text-xs text-gray-500">
+            <p>Hata ID: <span id="error-id"></span></p>
+            <p>Zaman: <span id="error-time"></span></p>
+        </div>
+    </div>
+    
+    <script>
+        // Error code mapping
+        const errorMessages = {
+            400: {
+                title: 'Geçersiz İstek',
+                description: 'Gönderdiğiniz istek geçersiz. Lütfen tekrar deneyin.'
+            },
+            401: {
+                title: 'Yetkisiz Erişim',
+                description: 'Bu sayfaya erişim yetkiniz bulunmuyor.'
+            },
+            403: {
+                title: 'Erişim Engellendi',
+                description: 'Bu sayfaya erişiminiz engellenmiş.'
+            },
+            404: {
+                title: 'Sayfa Bulunamadı',
+                description: 'Aradığınız sayfa bulunamadı veya taşınmış olabilir.'
+            },
+            500: {
+                title: 'Sunucu Hatası',
+                description: 'Sunucuda bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+            },
+            502: {
+                title: 'Ağ Geçidi Hatası',
+                description: 'Sunucu bağlantısında sorun var. Lütfen bekleyin.'
+            },
+            503: {
+                title: 'Hizmet Kullanılamıyor',
+                description: 'Sistem geçici olarak bakımda. Lütfen bekleyin.'
+            }
+        };
+        
+        // Get error code from URL or default to 500
+        function getErrorCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code') || '500';
+        }
+        
+        // Initialize error page
+        function initErrorPage() {
+            const errorCode = getErrorCode();
+            const errorInfo = errorMessages[errorCode] || errorMessages[500];
+            
+            document.getElementById('error-title').textContent = errorInfo.title;
+            document.getElementById('error-description').textContent = errorInfo.description;
+            document.getElementById('status-code').textContent = errorCode;
+            document.getElementById('error-id').textContent = generateErrorId();
+            document.getElementById('error-time').textContent = new Date().toLocaleString('tr-TR');
+            
+            // Update page title
+            document.title = `${errorInfo.title} - Lezzet Restaurant`;
+        }
+        
+        // Generate unique error ID
+        function generateErrorId() {
+            return 'ERR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        }
+        
+        // Navigation functions
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                goHome();
+            }
+        }
+        
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        // Report error function (optional)
+        function reportError() {
+            const errorData = {
+                code: getErrorCode(),
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                errorId: document.getElementById('error-id').textContent
+            };
+            
+            // Send error report to server
+            fetch('/backend/api/error-report.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(errorData)
+            }).catch(() => {
+                // Ignore errors in error reporting
+            });
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initErrorPage();
+            reportError();
+        });
+        
+        // Auto-refresh for 503 errors
+        if (getErrorCode() === '503') {
+            setTimeout(() => {
+                window.location.reload();
+            }, 30000); // Retry after 30 seconds
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                goBack();
+            } else if (e.key === 'Home') {
+                goHome();
+            } else if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                window.location.reload();
+            }
+        });
+        
+        // Add some interactive features
+        document.addEventListener('click', function(e) {
+            // Add ripple effect to buttons
+            if (e.target.tagName === 'BUTTON') {
+                const button = e.target;
+                const ripple = document.createElement('span');
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                button.style.position = 'relative';
+                button.style.overflow = 'hidden';
+                button.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+        
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Console message for developers
+        console.log(`%c
+        🍽️ Lezzet Restaurant - Error Page
+        
+        Error Code: ${getErrorCode()}
+        Time: ${new Date().toLocaleString()}
+        
+        If you're a developer, check the network tab for more details.
+        Contact: dev@lezzetrestaurant.com
+        `, 'color: #C8102E; font-size: 12px; font-family: monospace;');
+    </script>
+</body>
+</html>

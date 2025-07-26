@@ -71,9 +71,15 @@ class Utils {
     }
     
     // Görsel boyutlandırma
+    // Görsel boyutlandırma - Bug düzeltmesi
     public static function resizeImage($sourcePath, $targetPath, $maxWidth = 800, $maxHeight = 600, $quality = 85) {
         if (!file_exists($sourcePath)) {
-            throw new Exception('Kaynak dosya bulunamadı');
+            throw new Exception('Kaynak dosya bulunamadı: ' . $sourcePath);
+        }
+        
+        // GD extension kontrolü
+        if (!extension_loaded('gd')) {
+            throw new Exception('GD extension yüklü değil');
         }
         
         $imageInfo = getimagesize($sourcePath);
@@ -84,6 +90,12 @@ class Utils {
         $sourceWidth = $imageInfo[0];
         $sourceHeight = $imageInfo[1];
         $mimeType = $imageInfo['mime'];
+        
+        // Desteklenen format kontrolü
+        $supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($mimeType, $supportedTypes)) {
+            throw new Exception('Desteklenmeyen resim formatı: ' . $mimeType);
+        }
         
         // Yeni boyutları hesapla
         $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
@@ -109,17 +121,24 @@ class Utils {
                     $sourceImage = imagecreatefromwebp($sourcePath);
                 }
                 break;
+            case 'image/gif':
+                $sourceImage = imagecreatefromgif($sourcePath);
+                break;
         }
         
         if (!$sourceImage) {
-            throw new Exception('Desteklenmeyen resim formatı');
+            throw new Exception('Resim yüklenemedi: ' . $mimeType);
         }
         
         // Yeni resim oluştur
         $targetImage = imagecreatetruecolor($newWidth, $newHeight);
+        if (!$targetImage) {
+            imagedestroy($sourceImage);
+            throw new Exception('Hedef resim oluşturulamadı');
+        }
         
-        // PNG transparanlığını koru
-        if ($mimeType === 'image/png') {
+        // PNG ve GIF transparanlığını koru
+        if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
             imagealphablending($targetImage, false);
             imagesavealpha($targetImage, true);
             $transparent = imagecolorallocatealpha($targetImage, 255, 255, 255, 127);
@@ -127,7 +146,23 @@ class Utils {
         }
         
         // Resmi boyutlandır
-        imagecopyresampled($targetImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
+        $resizeResult = imagecopyresampled(
+            $targetImage, $sourceImage, 
+            0, 0, 0, 0, 
+            $newWidth, $newHeight, $sourceWidth, $sourceHeight
+        );
+        
+        if (!$resizeResult) {
+            imagedestroy($sourceImage);
+            imagedestroy($targetImage);
+            throw new Exception('Resim boyutlandırılamadı');
+        }
+        
+        // Hedef dizini oluştur
+        $targetDir = dirname($targetPath);
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
         
         // Hedef formatında kaydet
         $result = false;
@@ -136,18 +171,27 @@ class Utils {
                 $result = imagejpeg($targetImage, $targetPath, $quality);
                 break;
             case 'image/png':
-                $result = imagepng($targetImage, $targetPath, intval(9 * (100 - $quality) / 100));
+                // PNG için quality'yi 0-9 arasına çevir
+                $pngQuality = intval(9 * (100 - $quality) / 100);
+                $result = imagepng($targetImage, $targetPath, $pngQuality);
                 break;
             case 'image/webp':
                 if (function_exists('imagewebp')) {
                     $result = imagewebp($targetImage, $targetPath, $quality);
                 }
                 break;
+            case 'image/gif':
+                $result = imagegif($targetImage, $targetPath);
+                break;
         }
         
         // Belleği temizle
         imagedestroy($sourceImage);
         imagedestroy($targetImage);
+        
+        if (!$result) {
+            throw new Exception('Resim kaydedilemedi');
+        }
         
         return $result;
     }
