@@ -41,7 +41,7 @@ define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
 define('ALLOWED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'webp']);
 define('ALLOWED_MIME_TYPES', [
     'image/jpeg',
-    'image/png', 
+    'image/png',
     'image/webp',
     'image/gif'
 ]);
@@ -100,12 +100,12 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // Content Security Policy
 $csp = "default-src 'self'; " .
-       "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; " .
-       "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; " .
-       "img-src 'self' data: blob:; " .
-       "font-src 'self' https://fonts.gstatic.com; " .
-       "connect-src 'self'; " .
-       "frame-ancestors 'self'";
+    "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; " .
+    "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; " .
+    "img-src 'self' data: blob:; " .
+    "font-src 'self' https://fonts.gstatic.com; " .
+    "connect-src 'self'; " .
+    "frame-ancestors 'self'";
 
 header('Content-Security-Policy: ' . $csp);
 
@@ -116,60 +116,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // IP Address helper
-function getClientIP() {
-    $headers = [
-        'HTTP_CF_CONNECTING_IP',     // Cloudflare
-        'HTTP_CLIENT_IP',            // Proxy
-        'HTTP_X_FORWARDED_FOR',      // Load balancer/proxy
-        'HTTP_X_FORWARDED',          // Proxy
-        'HTTP_X_CLUSTER_CLIENT_IP',  // Cluster
-        'HTTP_FORWARDED_FOR',        // Proxy
-        'HTTP_FORWARDED',            // Proxy
-        'REMOTE_ADDR'                // Standard
-    ];
-    
-    foreach ($headers as $header) {
-        if (!empty($_SERVER[$header])) {
-            $ips = explode(',', $_SERVER[$header]);
-            $ip = trim($ips[0]);
-            
-            // Validate IP
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                return $ip;
+
+
+// config.php sonuna ekle:
+if (!function_exists('getClientIP')) {
+    function getClientIP()
+    {
+        $headers = [
+            'HTTP_CF_CONNECTING_IP',     // Cloudflare
+            'HTTP_CLIENT_IP',            // Proxy
+            'HTTP_X_FORWARDED_FOR',      // Load balancer/proxy
+            'HTTP_X_FORWARDED',          // Proxy
+            'HTTP_X_CLUSTER_CLIENT_IP',  // Cluster
+            'HTTP_FORWARDED_FOR',        // Proxy
+            'HTTP_FORWARDED',            // Proxy
+            'REMOTE_ADDR'                // Standard
+        ];
+
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                $ips = explode(',', $_SERVER[$header]);
+                $ip = trim($ips[0]);
+
+                // Validate IP
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    return $ip;
+                }
             }
         }
+
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     }
-    
-    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 }
 
 // Log function
-function logActivity($level, $message, $context = []) {
+function logActivity($level, $message, $context = [])
+{
     $logDir = __DIR__ . '/../logs/';
     if (!is_dir($logDir)) {
         mkdir($logDir, 0755, true);
     }
-    
+
     $logFile = $logDir . 'app-' . date('Y-m-d') . '.log';
     $timestamp = date('Y-m-d H:i:s');
     $ip = getClientIP();
     $contextStr = !empty($context) ? json_encode($context) : '';
-    
+
     $logEntry = "[{$timestamp}] [{$level}] [{$ip}] {$message} {$contextStr}" . PHP_EOL;
-    
+
     file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 }
 
 // Global exception handler
-set_exception_handler(function($exception) {
+set_exception_handler(function ($exception) {
     logActivity('ERROR', 'Uncaught exception: ' . $exception->getMessage(), [
         'file' => $exception->getFile(),
         'line' => $exception->getLine(),
         'trace' => $exception->getTraceAsString()
     ]);
-    
+
     http_response_code(500);
-    
+
     if (ini_get('display_errors')) {
         echo json_encode([
             'success' => false,
@@ -187,27 +194,27 @@ set_exception_handler(function($exception) {
 });
 
 // Global error handler
-set_error_handler(function($severity, $message, $file, $line) {
+set_error_handler(function ($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
         return;
     }
-    
+
     $levels = [
         E_ERROR => 'ERROR',
-        E_WARNING => 'WARNING', 
+        E_WARNING => 'WARNING',
         E_NOTICE => 'NOTICE',
         E_USER_ERROR => 'ERROR',
         E_USER_WARNING => 'WARNING',
         E_USER_NOTICE => 'NOTICE'
     ];
-    
+
     $level = $levels[$severity] ?? 'ERROR';
-    
+
     logActivity($level, $message, [
         'file' => $file,
         'line' => $line
     ]);
-    
+
     if ($severity === E_ERROR || $severity === E_USER_ERROR) {
         http_response_code(500);
         echo json_encode([
@@ -219,14 +226,14 @@ set_error_handler(function($severity, $message, $file, $line) {
 });
 
 // Register shutdown function
-register_shutdown_function(function() {
+register_shutdown_function(function () {
     $error = error_get_last();
     if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
         logActivity('FATAL', 'Fatal error: ' . $error['message'], [
             'file' => $error['file'],
             'line' => $error['line']
         ]);
-        
+
         if (!headers_sent()) {
             http_response_code(500);
             header('Content-Type: application/json');
@@ -250,12 +257,12 @@ if (isset($_ENV['ENVIRONMENT'])) {
             ini_set('display_errors', 1);
             error_reporting(E_ALL);
             break;
-            
+
         case 'staging':
             ini_set('display_errors', 0);
             error_reporting(E_ALL);
             break;
-            
+
         case 'production':
             ini_set('display_errors', 0);
             error_reporting(0);
@@ -281,4 +288,3 @@ logActivity('INFO', 'Request: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['R
     'referer' => $_SERVER['HTTP_REFERER'] ?? ''
 ]);
 ?>
-

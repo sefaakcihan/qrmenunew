@@ -10,6 +10,7 @@ class Admin {
     public function __construct() {
         $this->db = Database::getInstance();
     }
+    // Tüm model dosyalarında
     
     // Admin kimlik doğrulama - Enhanced security
     public function authenticate($username, $password) {

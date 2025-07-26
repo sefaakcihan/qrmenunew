@@ -5,9 +5,10 @@ require_once __DIR__ . '/../config/database.php';
 class MenuItem {
     private $db;
     
-    public function __construct() {
-        $this->db = new Database();
-    }
+    // Tüm model dosyalarında:
+public function __construct() {
+    $this->db = Database::getInstance(); // new Database() yerine
+}
     
     // Tüm menü öğelerini getir
     public function getAllItems($restaurantId, $categoryId = null, $isAvailable = null) {

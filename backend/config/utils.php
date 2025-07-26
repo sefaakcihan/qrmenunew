@@ -3,6 +3,56 @@
 
 // Yardımcı fonksiyonlar
 class Utils {
+
+public static function validateEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+public static function formatFileSize($bytes) {
+    $units = ['B', 'KB', 'MB', 'GB'];
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
+    return round($bytes / pow(1024, $pow), 2) . ' ' . $units[$pow];
+}
+
+public static function validateUploadedFile($file) {
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Dosya yükleme hatası');
+    }
+    
+    if ($file['size'] > MAX_FILE_SIZE) {
+        throw new Exception('Dosya boyutu çok büyük');
+    }
+    
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mimeType, ALLOWED_MIME_TYPES)) {
+        throw new Exception('Geçersiz dosya tipi');
+    }
+}
+
+public static function generateSafeFileName($originalName) {
+    $info = pathinfo($originalName);
+    $ext = strtolower($info['extension']);
+    return uniqid('file_') . '_' . time() . '.' . $ext;
+}
+
+public static function stripImageMetadata($imagePath) {
+    if (!extension_loaded('exif')) return;
+    
+    try {
+        $img = imagecreatefromstring(file_get_contents($imagePath));
+        if ($img) {
+            imagejpeg($img, $imagePath, 100);
+            imagedestroy($img);
+        }
+    } catch (Exception $e) {
+        // Log error
+    }
+}
     
     // JSON response
     public static function jsonResponse($data, $statusCode = 200) {

@@ -4,52 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Menu System - Kurulum</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C8102E',
+                        secondary: '#FFD700',
+                        accent: '#2E8B57'
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
+        .gradient-bg {
             background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
+        }
+        
+        .step-active {
+            background: linear-gradient(135deg, #C8102E, #FFD700);
             color: white;
-            text-align: center;
-            padding: 30px 20px;
         }
         
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .step-completed {
+            background: #10B981;
+            color: white;
         }
         
-        .content {
-            padding: 40px;
-        }
-        
-        .step {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        .step.active {
-            display: block;
+        .step-inactive {
+            background: #E5E7EB;
+            color: #6B7280;
         }
         
         @keyframes fadeIn {
@@ -57,420 +45,431 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
         }
         
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #C8102E;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .progress {
-            background: #e1e1e1;
-            border-radius: 10px;
-            height: 10px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
+        .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #C8102E;
             border-radius: 50%;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-        }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🍽️ Restaurant Menu System</h1>
-            <p>Kolay kurulum ile dijital menü sisteminizi başlatın</p>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Setup Wizard Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="mx-auto w-20 h-20 gradient-bg rounded-full flex items-center justify-center mb-4">
+                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Restaurant Menu System</h1>
+            <p class="text-gray-600">Kurulum Sihirbazı - Sistem kurulumunu tamamlayın</p>
         </div>
         
-        <div class="content">
-            <div class="progress">
-                <div class="progress-bar" id="progressBar"></div>
+        <!-- Progress Steps -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="step step-active flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold" data-step="1">1</div>
+                <div class="w-12 h-0.5 bg-gray-300"></div>
+                <div class="step step-inactive flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold" data-step="2">2</div>
+                <div class="w-12 h-0.5 bg-gray-300"></div>
+                <div class="step step-inactive flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold" data-step="3">3</div>
+                <div class="w-12 h-0.5 bg-gray-300"></div>
+                <div class="step step-inactive flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold" data-step="4">4</div>
+                <div class="w-12 h-0.5 bg-gray-300"></div>
+                <div class="step step-inactive flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold" data-step="5">5</div>
             </div>
-            
-            <!-- Adım 1: Veritabanı Ayarları -->
-            <div class="step active" id="step1">
-                <h2>📊 Veritabanı Ayarları</h2>
-                <p style="margin-bottom: 30px; color: #666;">MySQL veritabanı bağlantı bilgilerinizi girin:</p>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Sunucu Adresi</label>
-                        <input type="text" id="dbHost" value="localhost" placeholder="localhost">
-                    </div>
-                    <div class="form-group">
-                        <label>Port</label>
-                        <input type="text" id="dbPort" value="3306" placeholder="3306">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Veritabanı Adı</label>
-                    <input type="text" id="dbName" value="restaurant_menu" placeholder="restaurant_menu">
-                </div>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Kullanıcı Adı</label>
-                        <input type="text" id="dbUser" value="root" placeholder="root">
-                    </div>
-                    <div class="form-group">
-                        <label>Şifre</label>
-                        <input type="password" id="dbPass" placeholder="Veritabanı şifresi">
-                    </div>
-                </div>
-                
-                <div id="dbResult"></div>
-                
-                <div class="nav-buttons">
-                    <div></div>
-                    <button class="btn" onclick="testDatabase()">Bağlantıyı Test Et</button>
-                </div>
+        </div>
+        
+        <!-- Step Labels -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center space-x-8 text-xs text-gray-600">
+                <span class="text-center">Sistem<br>Kontrolü</span>
+                <span class="text-center">Veritabanı<br>Ayarları</span>
+                <span class="text-center">Admin<br>Hesabı</span>
+                <span class="text-center">Restoran<br>Bilgileri</span>
+                <span class="text-center">Kurulum<br>Tamamla</span>
             </div>
+        </div>
+        
+        <!-- Setup Content -->
+        <div class="max-w-2xl mx-auto">
             
-            <!-- Adım 2: Admin Hesabı -->
-            <div class="step" id="step2">
-                <h2>👤 Admin Hesabı</h2>
-                <p style="margin-bottom: 30px; color: #666;">Sistem yöneticisi hesabını oluşturun:</p>
+            <!-- Step 1: System Check -->
+            <div id="step-1" class="setup-step bg-white rounded-xl shadow-lg p-8 fade-in">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Sistem Gereksinimleri Kontrolü</h2>
                 
-                <div class="form-group">
-                    <label>Kullanıcı Adı</label>
-                    <input type="text" id="adminUsername" value="admin" placeholder="admin">
-                </div>
-                
-                <div class="form-group">
-                    <label>E-posta</label>
-                    <input type="email" id="adminEmail" placeholder="admin@example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>Ad Soyad</label>
-                    <input type="text" id="adminFullname" placeholder="Sistem Yöneticisi">
-                </div>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Şifre</label>
-                        <input type="password" id="adminPassword" placeholder="Güçlü bir şifre">
-                    </div>
-                    <div class="form-group">
-                        <label>Şifre Tekrar</label>
-                        <input type="password" id="adminPasswordConfirm" placeholder="Şifreyi tekrar girin">
-                    </div>
-                </div>
-                
-                <div class="nav-buttons">
-                    <button class="btn" onclick="previousStep()">Önceki</button>
-                    <button class="btn" onclick="nextStep()">Sonraki</button>
-                </div>
-            </div>
-            
-            <!-- Adım 3: Restoran Bilgileri -->
-            <div class="step" id="step3">
-                <h2>🏪 Restoran Bilgileri</h2>
-                <p style="margin-bottom: 30px; color: #666;">Restoran bilgilerinizi girin:</p>
-                
-                <div class="form-group">
-                    <label>Restoran Adı</label>
-                    <input type="text" id="restaurantName" value="Lezzet Restaurant" placeholder="Restoran adınız">
-                </div>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Telefon</label>
-                        <input type="tel" id="restaurantPhone" placeholder="+90 322 123 45 67">
-                    </div>
-                    <div class="form-group">
-                        <label>E-posta</label>
-                        <input type="email" id="restaurantEmail" placeholder="info@restaurant.com">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Adres</label>
-                    <textarea id="restaurantAddress" rows="3" placeholder="Restoran adresiniz"></textarea>
-                </div>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Para Birimi</label>
-                        <select id="currency">
-                            <option value="TL">Türk Lirası (₺)</option>
-                            <option value="USD">Dolar ($)</option>
-                            <option value="EUR">Euro (€)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Dil</label>
-                        <select id="language">
-                            <option value="tr">Türkçe</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="nav-buttons">
-                    <button class="btn" onclick="previousStep()">Önceki</button>
-                    <button class="btn" onclick="startInstallation()">Kurulumu Başlat</button>
-                </div>
-            </div>
-            
-            <!-- Adım 4: Kurulum -->
-            <div class="step" id="step4">
-                <h2>⚙️ Kurulum Tamamlanıyor</h2>
-                
-                <div id="installationProgress">
-                    <div class="alert alert-success" style="display: none;" id="successMessage">
-                        <h3>🎉 Kurulum Başarıyla Tamamlandı!</h3>
-                        <p>Restaurant Menu System kullanıma hazır. Aşağıdaki bağlantıları kullanabilirsiniz:</p>
-                        <br>
-                        <a href="admin/login.html" target="_blank" style="display: inline-block; margin: 10px; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">🔐 Admin Paneli</a>
-                        <a href="index.html" target="_blank" style="display: inline-block; margin: 10px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">📱 Menü Sayfası</a>
+                <div class="space-y-4">
+                    <div class="check-item flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            <div class="check-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                                <div class="spinner"></div>
+                            </div>
+                            <span>PHP Versiyonu (8.0+)</span>
+                        </div>
+                        <span class="check-result text-sm"></span>
                     </div>
                     
-                    <div id="installSteps"></div>
+                    <div class="check-item flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            <div class="check-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                                <div class="spinner"></div>
+                            </div>
+                            <span>MySQL/PDO Extension</span>
+                        </div>
+                        <span class="check-result text-sm"></span>
+                    </div>
+                    
+                    <div class="check-item flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            <div class="check-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                                <div class="spinner"></div>
+                            </div>
+                            <span>GD Extension (Resim işleme)</span>
+                        </div>
+                        <span class="check-result text-sm"></span>
+                    </div>
+                    
+                    <div class="check-item flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            <div class="check-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                                <div class="spinner"></div>
+                            </div>
+                            <span>Uploads Dizini Yazılabilir</span>
+                        </div>
+                        <span class="check-result text-sm"></span>
+                    </div>
+                    
+                    <div class="check-item flex items-center justify-between p-4 border rounded-lg">
+                        <div class="flex items-center">
+                            <div class="check-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                                <div class="spinner"></div>
+                            </div>
+                            <span>Logs Dizini Yazılabilir</span>
+                        </div>
+                        <span class="check-result text-sm"></span>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <button class="px-6 py-2 text-gray-500 bg-gray-200 rounded-lg cursor-not-allowed" disabled>
+                        Önceki
+                    </button>
+                    <button id="next-step-1" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors" disabled>
+                        Sonraki
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Database Settings -->
+            <div id="step-2" class="setup-step bg-white rounded-xl shadow-lg p-8 fade-in hidden">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Veritabanı Ayarları</h2>
+                
+                <form id="database-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sunucu Adresi</label>
+                            <input type="text" name="db_host" value="localhost" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Port</label>
+                            <input type="text" name="db_port" value="3306" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Veritabanı Adı</label>
+                        <input type="text" name="db_name" value="restaurant_menu" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kullanıcı Adı</label>
+                            <input type="text" name="db_user" value="root" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                            <input type="password" name="db_pass"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-medium text-blue-800">Bilgi</h3>
+                                <p class="text-sm text-blue-700 mt-1">Veritabanı yoksa otomatik olarak oluşturulacaktır. Kullanıcının CREATE DATABASE yetkisi olmalıdır.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="db-test-result" class="hidden"></div>
+                </form>
+                
+                <div class="mt-8 flex justify-between">
+                    <button id="prev-step-2" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        Önceki
+                    </button>
+                    <div class="flex space-x-3">
+                        <button id="test-db" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Bağlantıyı Test Et
+                        </button>
+                        <button id="next-step-2" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors" disabled>
+                            Sonraki
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Admin Account -->
+            <div id="step-3" class="setup-step bg-white rounded-xl shadow-lg p-8 fade-in hidden">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Admin Hesabı Oluştur</h2>
+                
+                <form id="admin-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kullanıcı Adı</label>
+                        <input type="text" name="admin_username" value="admin" required pattern="[a-zA-Z0-9_]{3,50}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">3-50 karakter, sadece harf, rakam ve alt çizgi</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                        <input type="email" name="admin_email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ad Soyad</label>
+                        <input type="text" name="admin_fullname" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                        <input type="password" name="admin_password" required minlength="8"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <div class="mt-2">
+                            <div class="text-xs text-gray-600">Şifre gereksinimleri:</div>
+                            <ul class="text-xs text-gray-500 mt-1 space-y-1">
+                                <li class="password-req" data-req="length">• En az 8 karakter</li>
+                                <li class="password-req" data-req="uppercase">• En az 1 büyük harf</li>
+                                <li class="password-req" data-req="lowercase">• En az 1 küçük harf</li>
+                                <li class="password-req" data-req="number">• En az 1 rakam</li>
+                                <li class="password-req" data-req="special">• En az 1 özel karakter</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Şifre Tekrar</label>
+                        <input type="password" name="admin_password_confirm" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </form>
+                
+                <div class="mt-8 flex justify-between">
+                    <button id="prev-step-3" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        Önceki
+                    </button>
+                    <button id="next-step-3" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Sonraki
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Restaurant Info -->
+            <div id="step-4" class="setup-step bg-white rounded-xl shadow-lg p-8 fade-in hidden">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Restoran Bilgileri</h2>
+                
+                <form id="restaurant-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Restoran Adı</label>
+                        <input type="text" name="restaurant_name" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                            <input type="tel" name="restaurant_phone"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                            <input type="email" name="restaurant_email"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
+                        <textarea name="restaurant_address" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                        <textarea name="restaurant_description" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tema Seçimi</label>
+                        <div id="theme-selection" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Themes will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Para Birimi</label>
+                            <select name="currency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="TL">Türk Lirası (₺)</option>
+                                <option value="USD">Dolar ($)</option>
+                                <option value="EUR">Euro (€)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Dil</label>
+                            <select name="language" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="tr">Türkçe</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="mt-8 flex justify-between">
+                    <button id="prev-step-4" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        Önceki
+                    </button>
+                    <button id="next-step-4" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Sonraki
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 5: Installation -->
+            <div id="step-5" class="setup-step bg-white rounded-xl shadow-lg p-8 fade-in hidden">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Kurulum Tamamlanıyor</h2>
+                
+                <div id="installation-progress" class="space-y-4">
+                    <div class="install-step flex items-center p-4 border rounded-lg">
+                        <div class="install-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <div class="spinner"></div>
+                        </div>
+                        <span>Veritabanı oluşturuluyor...</span>
+                    </div>
+                    
+                    <div class="install-step flex items-center p-4 border rounded-lg">
+                        <div class="install-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <div class="spinner"></div>
+                        </div>
+                        <span>Tablolar oluşturuluyor...</span>
+                    </div>
+                    
+                    <div class="install-step flex items-center p-4 border rounded-lg">
+                        <div class="install-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <div class="spinner"></div>
+                        </div>
+                        <span>Örnek veriler ekleniyor...</span>
+                    </div>
+                    
+                    <div class="install-step flex items-center p-4 border rounded-lg">
+                        <div class="install-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <div class="spinner"></div>
+                        </div>
+                        <span>Admin hesabı oluşturuluyor...</span>
+                    </div>
+                    
+                    <div class="install-step flex items-center p-4 border rounded-lg">
+                        <div class="install-icon w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <div class="spinner"></div>
+                        </div>
+                        <span>Konfigürasyon dosyası yazılıyor...</span>
+                    </div>
+                </div>
+                
+                <div id="installation-success" class="hidden text-center py-8">
+                    <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Kurulum Başarıyla Tamamlandı!</h3>
+                    <p class="text-gray-600 mb-6">Restaurant Menu System başarıyla kuruldu ve kullanıma hazır.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-900">Admin Paneli</h4>
+                            <p class="text-sm text-blue-700">Menü yönetimi ve sistem ayarları</p>
+                            <a href="/admin/login.html" class="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Admin Girişi
+                            </a>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-900">Müşteri Menüsü</h4>
+                            <p class="text-sm text-green-700">QR kod ile erişilebilir menü</p>
+                            <a href="/index.html" class="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                Menüyü Görüntüle
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-900 mb-2">Güvenlik Önerileri</h4>
+                        <ul class="text-sm text-yellow-800 text-left space-y-1">
+                            <li>• Bu kurulum dosyasını silin veya erişime kapatın</li>
+                            <li>• Admin şifrenizi güçlü bir şifre ile değiştirin</li>
+                            <li>• HTTPS sertifikası kullanın</li>
+                            <li>• Düzenli olarak sistem güncellemelerini takip edin</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <button id="prev-step-5" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        Önceki
+                    </button>
+                    <button id="start-installation" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Kurulumu Başlat
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        let currentStep = 1;
-        let maxSteps = 4;
-        let dbConfig = {};
-        
-        function updateProgress() {
-            const progress = (currentStep - 1) / (maxSteps - 1) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
-        
-        function showStep(step) {
-            // Tüm adımları gizle
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            // Seçili adımı göster
-            document.getElementById('step' + step).classList.add('active');
-            updateProgress();
-        }
-        
-        function nextStep() {
-            if (currentStep < maxSteps) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        }
-        
-        function previousStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        }
-        
-        async function testDatabase() {
-            const host = document.getElementById('dbHost').value;
-            const port = document.getElementById('dbPort').value;
-            const name = document.getElementById('dbName').value;
-            const user = document.getElementById('dbUser').value;
-            const pass = document.getElementById('dbPass').value;
-            
-            const resultDiv = document.getElementById('dbResult');
-            resultDiv.innerHTML = '<div class="loading"></div>Veritabanı bağlantısı test ediliyor...';
-            
-            // Basit test - gerçek kurulumda PHP ile yapılmalı
-            if (host && name && user) {
-                dbConfig = { host, port, name, user, pass };
-                
-                setTimeout(() => {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            ✅ Veritabanı bağlantısı başarılı! 
-                            <br><small>Sonraki adıma geçebilirsiniz.</small>
-                        </div>
-                    `;
-                    
-                    // Next button ekle
-                    const navButtons = document.querySelector('#step1 .nav-buttons');
-                    navButtons.innerHTML = `
-                        <div></div>
-                        <button class="btn" onclick="nextStep()">Sonraki Adım</button>
-                    `;
-                }, 2000);
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-error">
-                        ❌ Lütfen tüm alanları doldurun!
-                    </div>
-                `;
-            }
-        }
-        
-        async function startInstallation() {
-            currentStep = 4;
-            showStep(currentStep);
-            
-            const steps = [
-                'Veritabanı oluşturuluyor...',
-                'Tablolar oluşturuluyor...',
-                'Admin hesabı oluşturuluyor...',
-                'Örnek veriler ekleniyor...',
-                'Konfigürasyon tamamlanıyor...'
-            ];
-            
-            const stepsDiv = document.getElementById('installSteps');
-            
-            for (let i = 0; i < steps.length; i++) {
-                stepsDiv.innerHTML += `
-                    <div id="install-step-${i}" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
-                        <div class="loading"></div>${steps[i]}
-                    </div>
-                `;
-                
-                // Simulate installation step
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                document.getElementById(`install-step-${i}`).innerHTML = `
-                    <span style="color: green;">✅</span> ${steps[i].replace('...', ' - Tamamlandı')}
-                `;
-            }
-            
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Create basic files (simulation)
-            await createBasicFiles();
-        }
-        
-        async function createBasicFiles() {
-            // Bu fonksiyon gerçek kurulumda PHP tarafından yapılacak
-            console.log('Temel dosyalar oluşturuluyor...');
-            
-            // Admin verilerini al
-            const adminData = {
-                username: document.getElementById('adminUsername').value,
-                email: document.getElementById('adminEmail').value,
-                fullname: document.getElementById('adminFullname').value,
-                password: document.getElementById('adminPassword').value
-            };
-            
-            // Restoran verilerini al
-            const restaurantData = {
-                name: document.getElementById('restaurantName').value,
-                phone: document.getElementById('restaurantPhone').value,
-                email: document.getElementById('restaurantEmail').value,
-                address: document.getElementById('restaurantAddress').value,
-                currency: document.getElementById('currency').value,
-                language: document.getElementById('language').value
-            };
-            
-            console.log('Kurulum verileri:', { dbConfig, adminData, restaurantData });
-        }
-        
-        // Sayfa yüklendiğinde
-        updateProgress();
-    </script>
+    
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <div class="text-center">
+                <div class="spinner mx-auto mb-4" style="width: 40px; height: 40px; border-width: 4px;"></div>
+                <h3 class="text-lg font-semibold mb-2">İşlem devam ediyor...</h3>
+                <p class="text-gray-600">Lütfen bekleyin...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="setup.js"></script>
 </body>
 </html>
