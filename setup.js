@@ -1,7 +1,8 @@
+// setup.js - Fixed Version
 
 (() => {
   /* -----------------------------------------------------
-   *  SETUP WIZARD CLASS
+   *  SETUP WIZARD CLASS
    * --------------------------------------------------- */
   class SetupWizard {
     constructor() {
@@ -41,7 +42,7 @@
     }
 
     setupEventListeners() {
-      /* — Adım ileri / geri — */
+      /* — Adım ileri / geri — */
       Object.values(this.btnNext).forEach(btn =>
         btn?.addEventListener('click', () => this.nextStep())
       );
@@ -49,13 +50,13 @@
         btn?.addEventListener('click', () => this.prevStep())
       );
 
-      /* — Veritabanı testi — */
+      /* — Veritabanı testi — */
       this.btnTestDB?.addEventListener('click', () => this.testDatabaseConnection());
 
-      /* — Kurulumu başlat — */
+      /* — Kurulumu başlat — */
       this.btnInstall?.addEventListener('click', () => this.startInstallation());
 
-      /* — Canlı validasyonlar — */
+      /* — Canlı validasyonlar — */
       document.getElementById('admin-form')?.addEventListener('input', () => {
         this.toggleButton(this.btnNext[3], this.validateAdminForm());
       });
@@ -67,9 +68,14 @@
       document
         .querySelector('input[name="admin_password"]')
         ?.addEventListener('input', () => this.validatePassword());
+
+      /* — Restaurant form validation — */
+      document.getElementById('restaurant-form')?.addEventListener('input', () => {
+        this.toggleButton(this.btnNext[4], this.validateRestaurantForm());
+      });
     }
 
-    /* ----------  YARDIMCI METOT ---------- */
+    /* ----------  YARDIMCI METOT ---------- */
     toggleButton(btn, enabled) {
       if (!btn) return;
       btn.disabled = !enabled;
@@ -79,14 +85,33 @@
       btn.classList.toggle('hover:bg-opacity-90', enabled);
     }
 
-    /* ----------  1. SİSTEM KONTROLÜ ---------- */
+    showError(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 5000);
+    }
+
+    /* ----------  1. SİSTEM KONTROLÜ ---------- */
     async startSystemCheck() {
       const checks = [
-        { label: 'PHP Versiyonu (8.0+)',        key: 'php_version'      },
-        { label: 'MySQL/PDO Extension',         key: 'pdo_extension'    },
-        { label: 'GD Extension (Resim işleme)', key: 'gd_extension'     },
-        { label: 'Uploads Dizini Yazılabilir',  key: 'uploads_writable' },
-        { label: 'Logs Dizini Yazılabilir',     key: 'logs_writable'    }
+        { label: 'PHP Versiyonu (8.0+)',        key: 'php_version'      },
+        { label: 'MySQL/PDO Extension',         key: 'pdo_extension'    },
+        { label: 'GD Extension (Resim işleme)', key: 'gd_extension'     },
+        { label: 'Uploads Dizini Yazılabilir',  key: 'uploads_writable' },
+        { label: 'Logs Dizini Yazılabilir',     key: 'logs_writable'    }
       ];
 
       let allPassed = true;
@@ -102,17 +127,19 @@
             action: 'system_check',
             check : key
           });
+          
           if (!res.success) throw new Error(res.message);
 
-          icon.textContent = '✓';
-          icon.className   = 'check-icon w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3';
+          icon.innerHTML = '✓';
+          icon.className = 'check-icon w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3';
           resultEl.textContent = res.message || 'Geçti';
-          resultEl.className   = 'check-result text-sm text-green-600';
+          resultEl.className = 'check-result text-sm text-green-600';
         } catch (err) {
-          icon.textContent = '✗';
-          icon.className   = 'check-icon w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center mr-3';
+          console.error('System check failed:', key, err);
+          icon.innerHTML = '✗';
+          icon.className = 'check-icon w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center mr-3';
           resultEl.textContent = err.message || 'Başarısız';
-          resultEl.className   = 'check-result text-sm text-red-600';
+          resultEl.className = 'check-result text-sm text-red-600';
           allPassed = false;
         }
 
@@ -122,22 +149,24 @@
       this.toggleButton(this.btnNext[1], allPassed);
     }
 
-    /* ----------  2. VERİTABANI TESTİ ---------- */
+    /* ----------  2. VERİTABANI TESTİ ---------- */
     validateDatabaseForm() {
       const fd = new FormData(document.getElementById('database-form'));
       return ['db_host', 'db_name', 'db_user'].every(f => fd.get(f)?.trim());
     }
 
     async testDatabaseConnection() {
-      if (!this.validateDatabaseForm()) return;
+      if (!this.validateDatabaseForm()) {
+        this.showError('Lütfen tüm gerekli alanları doldurun');
+        return;
+      }
 
       const fd      = new FormData(document.getElementById('database-form'));
       const box     = document.getElementById('db-test-result');
       const originalLabel = this.btnTestDB.textContent;
 
       this.btnTestDB.disabled = true;
-      this.btnTestDB.innerHTML =
-        '<div class="spinner mr-2"></div>Test ediliyor...';
+      this.btnTestDB.innerHTML = '<div class="spinner mr-2"></div>Test ediliyor...';
 
       try {
         const res = await this.makeRequest('setup_check.php', {
@@ -148,10 +177,10 @@
           db_user: fd.get('db_user'),
           db_pass: fd.get('db_pass')
         });
+        
         if (!res.success) throw new Error(res.message);
 
-        box.className =
-          'mt-4 p-4 rounded-lg bg-green-50 border border-green-200';
+        box.className = 'mt-4 p-4 rounded-lg bg-green-50 border border-green-200';
         box.innerHTML = `
           <div class="flex">
             <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -160,6 +189,7 @@
             <div>
               <h3 class="text-sm font-medium text-green-800">Bağlantı Başarılı</h3>
               <p class="text-sm text-green-700 mt-1">${res.message}</p>
+              ${res.server_version ? `<p class="text-xs text-green-600 mt-1">MySQL Sürümü: ${res.server_version}</p>` : ''}
             </div>
           </div>
         `;
@@ -174,8 +204,8 @@
 
         this.toggleButton(this.btnNext[2], true);
       } catch (err) {
-        box.className =
-          'mt-4 p-4 rounded-lg bg-red-50 border border-red-200';
+        console.error('Database test failed:', err);
+        box.className = 'mt-4 p-4 rounded-lg bg-red-50 border border-red-200';
         box.innerHTML = `
           <div class="flex">
             <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -195,7 +225,7 @@
       }
     }
 
-    /* ----------  3. ADMİN FORMU ---------- */
+    /* ----------  3. ADMİN FORMU ---------- */
     validatePassword() {
       const pwd = document.querySelector('input[name="admin_password"]')?.value || '';
       const ok  = {
@@ -219,17 +249,29 @@
     validateAdminForm() {
       const fd = new FormData(document.getElementById('admin-form'));
 
+      const username = fd.get('admin_username')?.trim();
+      const email = fd.get('admin_email')?.trim();
+      const fullname = fd.get('admin_fullname')?.trim();
+      const password = fd.get('admin_password');
+      const confirmPassword = fd.get('admin_password_confirm');
+
       const valid =
-        fd.get('admin_username')?.trim().match(/^[a-zA-Z0-9_]{3,50}$/) &&
-        fd.get('admin_email')?.trim().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) &&
-        fd.get('admin_fullname')?.trim().length >= 2 &&
+        username && username.match(/^[a-zA-Z0-9_]{3,50}$/) &&
+        email && email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) &&
+        fullname && fullname.length >= 2 &&
         this.validatePassword() &&
-        fd.get('admin_password') === fd.get('admin_password_confirm');
+        password === confirmPassword;
 
       return !!valid;
     }
 
-    /* ----------  4. TEMA SEÇİMİ ---------- */
+    /* ----------  4. RESTORAN FORMU ---------- */
+    validateRestaurantForm() {
+      const nameInput = document.querySelector('input[name="restaurant_name"]');
+      return nameInput && nameInput.value.trim().length > 0;
+    }
+
+    /* ----------  4. TEMA SEÇİMİ ---------- */
     async loadThemes() {
       try {
         const res = await this.makeRequest('setup_check.php', { action: 'get_themes' });
@@ -238,12 +280,14 @@
         } else {
           throw new Error(res.message);
         }
-      } catch {
+      } catch (err) {
+        console.error('Failed to load themes:', err);
+        // Fallback themes
         this.themes = [
-          { id: 1, name: 'Classic Restaurant', slug: 'classic',        primary_color: '#C8102E' },
-          { id: 2, name: 'Modern Minimalist',  slug: 'modern',         primary_color: '#667EEA' },
-          { id: 3, name: 'Dark Elegance',      slug: 'dark-elegance',  primary_color: '#D4AF37' },
-          { id: 4, name: 'Colorful Cafe',      slug: 'colorful',       primary_color: '#FF6B6B' }
+          { id: 1, name: 'Classic Restaurant', slug: 'classic', primary_color: '#C8102E' },
+          { id: 2, name: 'Modern Minimalist', slug: 'modern', primary_color: '#667EEA' },
+          { id: 3, name: 'Dark Elegance', slug: 'dark-elegance', primary_color: '#D4AF37' },
+          { id: 4, name: 'Colorful Cafe', slug: 'colorful', primary_color: '#FF6B6B' }
         ];
       } finally {
         this.renderThemes();
@@ -292,11 +336,7 @@
         case 3:
           return this.validateAdminForm();
         case 4:
-          return (
-            document
-              .querySelector('input[name="restaurant_name"]')
-              ?.value.trim().length > 0
-          );
+          return this.validateRestaurantForm();
         default:
           return true;
       }
@@ -304,7 +344,10 @@
 
     nextStep() {
       if (this.currentStep >= this.totalSteps) return;
-      if (!this.validateCurrentStep()) return;
+      if (!this.validateCurrentStep()) {
+        this.showError('Lütfen tüm gerekli alanları doldurun');
+        return;
+      }
 
       document.getElementById(`step-${this.currentStep}`).classList.add('hidden');
       this.currentStep += 1;
@@ -347,11 +390,14 @@
     /* ----------  KURULUM  ---------- */
     loadRestaurantForm() {
       const nameInput = document.querySelector('input[name="restaurant_name"]');
-      if (nameInput && !nameInput.value.trim()) nameInput.value = 'Lezzet Restaurant';
+      if (nameInput && !nameInput.value.trim()) {
+        nameInput.value = 'Lezzet Restaurant';
+        this.toggleButton(this.btnNext[4], true);
+      }
     }
 
     collectAllData() {
-      /* DB zaten store edildi */
+      /* DB zaten store edildi */
       const admin = new FormData(document.getElementById('admin-form'));
       this.setupData.admin = {
         username: admin.get('admin_username'),
@@ -379,27 +425,38 @@
       this.btnInstall?.classList.add('hidden');
 
       const tasks = [
-        { action: 'create_database',     icon: 0 },
-        { action: 'create_tables',       icon: 1 },
-        { action: 'insert_sample_data',  icon: 2 },
-        { action: 'create_admin',        icon: 3 },
-        { action: 'write_config',        icon: 4 }
+        { action: 'create_database',     icon: 0, label: 'Veritabanı oluşturuluyor...' },
+        { action: 'create_tables',       icon: 1, label: 'Tablolar oluşturuluyor...' },
+        { action: 'insert_sample_data',  icon: 2, label: 'Örnek veriler ekleniyor...' },
+        { action: 'create_admin',        icon: 3, label: 'Admin hesabı oluşturuluyor...' },
+        { action: 'write_config',        icon: 4, label: 'Konfigürasyon dosyası yazılıyor...' }
       ];
 
       for (const t of tasks) {
-        const icon = document.querySelectorAll('.install-icon')[t.icon];
+        const step = document.querySelectorAll('.install-step')[t.icon];
+        const icon = step.querySelector('.install-icon');
+        const label = step.querySelector('span');
+        
         try {
+          // Update label
+          if (label) label.textContent = t.label;
+          
           const res = await this.makeRequest('setup_install.php', {
             action    : t.action,
             setup_data: this.setupData
           });
+          
           if (!res.success) throw new Error(res.message);
 
-          icon.textContent = '✓';
+          icon.innerHTML = '✓';
           icon.className =
             'install-icon w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3';
+            
+          if (label) label.textContent = label.textContent.replace('...', ' - Tamamlandı');
+          
         } catch (err) {
-          icon.textContent = '✗';
+          console.error('Installation step failed:', t.action, err);
+          icon.innerHTML = '✗';
           icon.className =
             'install-icon w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center mr-3';
           this.showInstallationError(err.message);
@@ -424,35 +481,50 @@
           <h3 class="text-xl font-bold text-gray-900 mb-2">Kurulum Başarısız</h3>
           <p class="text-red-600 mb-4">${msg}</p>
           <button onclick="location.reload()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">
-            Tekrar Dene
+            Tekrar Dene
           </button>
         </div>`;
     }
 
-    /* ----------  ORTAK FETCH  ---------- */
+    /* ----------  ORTAK FETCH  ---------- */
     async makeRequest(url, data) {
-      const res = await fetch(url, {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      try {
+        const res = await fetch(url, {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify(data)
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        const result = await res.json();
+        
+        // Log successful requests for debugging
+        console.log('Request successful:', url, result);
+        
+        return result;
+        
+      } catch (error) {
+        console.error('Request failed:', url, error);
+        throw error;
+      }
     }
   }
 
   /* -----------------------------------------------------
-   *  SCRIPT BOOTSTRAP
+   *  SCRIPT BOOTSTRAP
    * --------------------------------------------------- */
   document.addEventListener('DOMContentLoaded', () => {
     window.setupWizard = new SetupWizard();
   });
 
   window.addEventListener('beforeunload', e => {
-    if (window.setupWizard?.currentStep > 1) {
+    if (window.setupWizard?.currentStep > 1 && window.setupWizard?.currentStep < 5) {
       e.preventDefault();
       e.returnValue =
-        'Kurulum devam ediyor. Sayfayı kapatmak istediğinizden emin misiniz?';
+        'Kurulum devam ediyor. Sayfayı kapatmak istediğinizden emin misiniz?';
     }
   });
 

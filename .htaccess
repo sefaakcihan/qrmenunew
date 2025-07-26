@@ -1,0 +1,15 @@
+# Restaurant Menu System Security
+RewriteEngine On
+
+# Hide sensitive files
+<Files "*.flag">
+    Require all denied
+</Files>
+
+<Files "setup*.php">
+    Require all denied
+</Files>
+
+<Files "database.sql">
+    Require all denied
+</Files>

@@ -1,5 +1,5 @@
 <?php
-// setup_check.php - Setup System Check Backend
+// setup_check.php - Setup System Check Backend (FIXED)
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -93,10 +93,19 @@ function performSystemCheck($check) {
                 }
             }
             
+            // Create subdirectories
+            $subDirs = ['images', 'logos', 'themes'];
+            foreach ($subDirs as $dir) {
+                $fullPath = $uploadDir . '/' . $dir;
+                if (!is_dir($fullPath)) {
+                    mkdir($fullPath, 0755, true);
+                }
+            }
+            
             $success = is_writable($uploadDir);
             return [
                 'success' => $success,
-                'message' => $success ? 'Uploads dizini yazılabilir' : 'Uploads dizini yazılabilir değil (chmod 755)'
+                'message' => $success ? 'Uploads dizini yazılabilir' : 'Uploads dizini yazılabilir değil (chmod 755 gerekli)'
             ];
             
         case 'logs_writable':
@@ -116,7 +125,7 @@ function performSystemCheck($check) {
             $success = is_writable($logsDir);
             return [
                 'success' => $success,
-                'message' => $success ? 'Logs dizini yazılabilir' : 'Logs dizini yazılabilir değil (chmod 755)'
+                'message' => $success ? 'Logs dizini yazılabilir' : 'Logs dizini yazılabilir değil (chmod 755 gerekli)'
             ];
             
         default:
@@ -125,68 +134,134 @@ function performSystemCheck($check) {
 }
 
 function testDatabaseConnection($config) {
+    // Input validation
     $host = $config['db_host'] ?? 'localhost';
     $port = $config['db_port'] ?? '3306';
     $dbname = $config['db_name'] ?? '';
     $username = $config['db_user'] ?? '';
     $password = $config['db_pass'] ?? '';
     
+    // Validate required fields
     if (empty($dbname) || empty($username)) {
         throw new Exception('Veritabanı adı ve kullanıcı adı gerekli');
     }
     
+    // Validate database name (security check)
+    if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $dbname)) {
+        throw new Exception('Geçersiz veritabanı adı. Sadece harf, rakam ve alt çizgi kullanın.');
+    }
+    
+    // Validate username (security check)
+    if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $username)) {
+        throw new Exception('Geçersiz kullanıcı adı. Sadece harf, rakam ve alt çizgi kullanın.');
+    }
+    
     try {
-        // First try to connect without database to check credentials
+        // First try to connect without database to check server and credentials
         $dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
-        $pdo = new PDO($dsn, $username, $password, [
+        $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_TIMEOUT => 10
-        ]);
+            PDO::ATTR_TIMEOUT => 10,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ];
+        
+        $pdo = new PDO($dsn, $username, $password, $options);
+        
+        // Test server connection
+        $pdo->query("SELECT 1");
         
         // Check if database exists
         $stmt = $pdo->prepare("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
         $stmt->execute([$dbname]);
         $dbExists = $stmt->fetch() !== false;
         
+        $message = '';
+        
         if (!$dbExists) {
             // Try to create database
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbname}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            $message = "Veritabanı '{$dbname}' başarıyla oluşturuldu";
+            try {
+                $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbname}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                $message = "Veritabanı '{$dbname}' başarıyla oluşturuldu";
+            } catch (PDOException $createError) {
+                throw new Exception("Veritabanı oluşturulamadı: " . $createError->getMessage());
+            }
         } else {
             $message = "Veritabanı '{$dbname}' mevcut ve erişilebilir";
         }
         
         // Test connection to the specific database
         $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
-        $testPdo = new PDO($dsn, $username, $password, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]);
+        $testPdo = new PDO($dsn, $username, $password, $options);
         
         // Test a simple query
         $testPdo->query("SELECT 1");
         
+        // Check user privileges
+        $privilegeCheck = $testPdo->query("SHOW GRANTS FOR CURRENT_USER()");
+        $grants = $privilegeCheck->fetchAll(PDO::FETCH_COLUMN);
+        
+        $hasCreatePrivilege = false;
+        $hasInsertPrivilege = false;
+        $hasSelectPrivilege = false;
+        
+        foreach ($grants as $grant) {
+            if (stripos($grant, 'ALL PRIVILEGES') !== false || 
+                stripos($grant, 'CREATE') !== false) {
+                $hasCreatePrivilege = true;
+            }
+            if (stripos($grant, 'ALL PRIVILEGES') !== false || 
+                stripos($grant, 'INSERT') !== false) {
+                $hasInsertPrivilege = true;
+            }
+            if (stripos($grant, 'ALL PRIVILEGES') !== false || 
+                stripos($grant, 'SELECT') !== false) {
+                $hasSelectPrivilege = true;
+            }
+        }
+        
+        if (!$hasCreatePrivilege || !$hasInsertPrivilege || !$hasSelectPrivilege) {
+            $message .= ' (Uyarı: Bazı yetkiler eksik olabilir)';
+        }
+        
         return [
             'success' => true,
             'message' => $message,
-            'database_exists' => $dbExists
+            'database_exists' => $dbExists,
+            'server_version' => $pdo->getAttribute(PDO::ATTR_SERVER_VERSION)
         ];
         
     } catch (PDOException $e) {
         $errorCode = $e->getCode();
+        $errorMessage = $e->getMessage();
         
+        // Handle specific MySQL error codes
         switch ($errorCode) {
-            case 1044:
-            case 1045:
+            case 1044: // Access denied for user to database
+                $message = 'Kullanıcının veritabanına erişim yetkisi yok';
+                break;
+            case 1045: // Access denied for user (using password: YES/NO)
                 $message = 'Veritabanı kullanıcı adı veya şifresi yanlış';
                 break;
-            case 2002:
-                $message = 'Veritabanı sunucusuna bağlanılamıyor. Sunucu adresi kontrol edin.';
+            case 2002: // Can't connect to local MySQL server
+                $message = 'MySQL sunucusuna bağlanılamıyor. Sunucu çalışıyor mu?';
                 break;
-            case 1049:
-                $message = "Veritabanı '{$dbname}' bulunamadı ve oluşturulamadı";
+            case 1049: // Unknown database
+                $message = "Veritabanı '{$dbname}' bulunamadı";
+                break;
+            case 2005: // Unknown MySQL server host
+                $message = 'MySQL sunucu adresi bulunamadı';
                 break;
             default:
-                $message = 'Veritabanı bağlantı hatası: ' . $e->getMessage();
+                // Check for common error patterns in message
+                if (stripos($errorMessage, 'connection refused') !== false) {
+                    $message = 'Bağlantı reddedildi. Port numarası doğru mu?';
+                } elseif (stripos($errorMessage, 'timeout') !== false) {
+                    $message = 'Bağlantı zaman aşımı. Sunucu yavaş yanıt veriyor.';
+                } elseif (stripos($errorMessage, 'host') !== false) {
+                    $message = 'Sunucu adresi yanlış veya erişilemiyor';
+                } else {
+                    $message = 'Veritabanı bağlantı hatası: ' . $errorMessage;
+                }
         }
         
         throw new Exception($message);
@@ -272,7 +347,8 @@ function getAvailableThemes() {
     
     return [
         'success' => true,
-        'data' => $themes
+        'data' => $themes,
+        'message' => count($themes) . ' tema mevcut'
     ];
 }
 
@@ -305,5 +381,28 @@ function isStrongPassword($password) {
     if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) return false;
     
     return true;
+}
+
+// Security helper - log suspicious activity
+function logSecurityEvent($event, $details = []) {
+    $logDir = __DIR__ . '/backend/logs';
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    $logFile = $logDir . '/security-' . date('Y-m-d') . '.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    
+    $logEntry = json_encode([
+        'timestamp' => $timestamp,
+        'event' => $event,
+        'ip' => $ip,
+        'user_agent' => $userAgent,
+        'details' => $details
+    ]) . PHP_EOL;
+    
+    file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 }
 ?>
