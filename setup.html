@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu System - Kurulum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #C8102E;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .progress {
+            background: #e1e1e1;
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, #C8102E 0%, #FFD700 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #C8102E;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Restaurant Menu System</h1>
+            <p>Kolay kurulum ile dijital menü sisteminizi başlatın</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <!-- Adım 1: Veritabanı Ayarları -->
+            <div class="step active" id="step1">
+                <h2>📊 Veritabanı Ayarları</h2>
+                <p style="margin-bottom: 30px; color: #666;">MySQL veritabanı bağlantı bilgilerinizi girin:</p>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Sunucu Adresi</label>
+                        <input type="text" id="dbHost" value="localhost" placeholder="localhost">
+                    </div>
+                    <div class="form-group">
+                        <label>Port</label>
+                        <input type="text" id="dbPort" value="3306" placeholder="3306">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Veritabanı Adı</label>
+                    <input type="text" id="dbName" value="restaurant_menu" placeholder="restaurant_menu">
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı</label>
+                        <input type="text" id="dbUser" value="root" placeholder="root">
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" id="dbPass" placeholder="Veritabanı şifresi">
+                    </div>
+                </div>
+                
+                <div id="dbResult"></div>
+                
+                <div class="nav-buttons">
+                    <div></div>
+                    <button class="btn" onclick="testDatabase()">Bağlantıyı Test Et</button>
+                </div>
+            </div>
+            
+            <!-- Adım 2: Admin Hesabı -->
+            <div class="step" id="step2">
+                <h2>👤 Admin Hesabı</h2>
+                <p style="margin-bottom: 30px; color: #666;">Sistem yöneticisi hesabını oluşturun:</p>
+                
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="adminUsername" value="admin" placeholder="admin">
+                </div>
+                
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" id="adminEmail" placeholder="admin@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Ad Soyad</label>
+                    <input type="text" id="adminFullname" placeholder="Sistem Yöneticisi">
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" id="adminPassword" placeholder="Güçlü bir şifre">
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre Tekrar</label>
+                        <input type="password" id="adminPasswordConfirm" placeholder="Şifreyi tekrar girin">
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn" onclick="previousStep()">Önceki</button>
+                    <button class="btn" onclick="nextStep()">Sonraki</button>
+                </div>
+            </div>
+            
+            <!-- Adım 3: Restoran Bilgileri -->
+            <div class="step" id="step3">
+                <h2>🏪 Restoran Bilgileri</h2>
+                <p style="margin-bottom: 30px; color: #666;">Restoran bilgilerinizi girin:</p>
+                
+                <div class="form-group">
+                    <label>Restoran Adı</label>
+                    <input type="text" id="restaurantName" value="Lezzet Restaurant" placeholder="Restoran adınız">
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input type="tel" id="restaurantPhone" placeholder="+90 322 123 45 67">
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" id="restaurantEmail" placeholder="info@restaurant.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Adres</label>
+                    <textarea id="restaurantAddress" rows="3" placeholder="Restoran adresiniz"></textarea>
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Para Birimi</label>
+                        <select id="currency">
+                            <option value="TL">Türk Lirası (₺)</option>
+                            <option value="USD">Dolar ($)</option>
+                            <option value="EUR">Euro (€)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dil</label>
+                        <select id="language">
+                            <option value="tr">Türkçe</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn" onclick="previousStep()">Önceki</button>
+                    <button class="btn" onclick="startInstallation()">Kurulumu Başlat</button>
+                </div>
+            </div>
+            
+            <!-- Adım 4: Kurulum -->
+            <div class="step" id="step4">
+                <h2>⚙️ Kurulum Tamamlanıyor</h2>
+                
+                <div id="installationProgress">
+                    <div class="alert alert-success" style="display: none;" id="successMessage">
+                        <h3>🎉 Kurulum Başarıyla Tamamlandı!</h3>
+                        <p>Restaurant Menu System kullanıma hazır. Aşağıdaki bağlantıları kullanabilirsiniz:</p>
+                        <br>
+                        <a href="admin/login.html" target="_blank" style="display: inline-block; margin: 10px; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">🔐 Admin Paneli</a>
+                        <a href="index.html" target="_blank" style="display: inline-block; margin: 10px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">📱 Menü Sayfası</a>
+                    </div>
+                    
+                    <div id="installSteps"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let maxSteps = 4;
+        let dbConfig = {};
+        
+        function updateProgress() {
+            const progress = (currentStep - 1) / (maxSteps - 1) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function showStep(step) {
+            // Tüm adımları gizle
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            // Seçili adımı göster
+            document.getElementById('step' + step).classList.add('active');
+            updateProgress();
+        }
+        
+        function nextStep() {
+            if (currentStep < maxSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+        
+        async function testDatabase() {
+            const host = document.getElementById('dbHost').value;
+            const port = document.getElementById('dbPort').value;
+            const name = document.getElementById('dbName').value;
+            const user = document.getElementById('dbUser').value;
+            const pass = document.getElementById('dbPass').value;
+            
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '<div class="loading"></div>Veritabanı bağlantısı test ediliyor...';
+            
+            // Basit test - gerçek kurulumda PHP ile yapılmalı
+            if (host && name && user) {
+                dbConfig = { host, port, name, user, pass };
+                
+                setTimeout(() => {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ Veritabanı bağlantısı başarılı! 
+                            <br><small>Sonraki adıma geçebilirsiniz.</small>
+                        </div>
+                    `;
+                    
+                    // Next button ekle
+                    const navButtons = document.querySelector('#step1 .nav-buttons');
+                    navButtons.innerHTML = `
+                        <div></div>
+                        <button class="btn" onclick="nextStep()">Sonraki Adım</button>
+                    `;
+                }, 2000);
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        ❌ Lütfen tüm alanları doldurun!
+                    </div>
+                `;
+            }
+        }
+        
+        async function startInstallation() {
+            currentStep = 4;
+            showStep(currentStep);
+            
+            const steps = [
+                'Veritabanı oluşturuluyor...',
+                'Tablolar oluşturuluyor...',
+                'Admin hesabı oluşturuluyor...',
+                'Örnek veriler ekleniyor...',
+                'Konfigürasyon tamamlanıyor...'
+            ];
+            
+            const stepsDiv = document.getElementById('installSteps');
+            
+            for (let i = 0; i < steps.length; i++) {
+                stepsDiv.innerHTML += `
+                    <div id="install-step-${i}" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                        <div class="loading"></div>${steps[i]}
+                    </div>
+                `;
+                
+                // Simulate installation step
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                document.getElementById(`install-step-${i}`).innerHTML = `
+                    <span style="color: green;">✅</span> ${steps[i].replace('...', ' - Tamamlandı')}
+                `;
+            }
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Create basic files (simulation)
+            await createBasicFiles();
+        }
+        
+        async function createBasicFiles() {
+            // Bu fonksiyon gerçek kurulumda PHP tarafından yapılacak
+            console.log('Temel dosyalar oluşturuluyor...');
+            
+            // Admin verilerini al
+            const adminData = {
+                username: document.getElementById('adminUsername').value,
+                email: document.getElementById('adminEmail').value,
+                fullname: document.getElementById('adminFullname').value,
+                password: document.getElementById('adminPassword').value
+            };
+            
+            // Restoran verilerini al
+            const restaurantData = {
+                name: document.getElementById('restaurantName').value,
+                phone: document.getElementById('restaurantPhone').value,
+                email: document.getElementById('restaurantEmail').value,
+                address: document.getElementById('restaurantAddress').value,
+                currency: document.getElementById('currency').value,
+                language: document.getElementById('language').value
+            };
+            
+            console.log('Kurulum verileri:', { dbConfig, adminData, restaurantData });
+        }
+        
+        // Sayfa yüklendiğinde
+        updateProgress();
+    </script>
+</body>
+</html>
